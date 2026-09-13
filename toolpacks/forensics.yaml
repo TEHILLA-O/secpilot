@@ -1,0 +1,7 @@
+name: forensics
+description: Local file identification and rule matching
+adapters:
+  - file
+  - strings
+  - exiftool
+  - yara

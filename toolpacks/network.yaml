@@ -1,0 +1,7 @@
+name: network
+description: Host and service discovery using nmap, dig, ip, and ss
+adapters:
+  - nmap
+  - dig
+  - ip
+  - ss

@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "secpilot"
+version = "0.1.0"
+description = "LLM-powered security operations terminal with a policy engine that decides what is executable."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "SecPilot" },
+]
+keywords = [
+    "security",
+    "kali",
+    "audit",
+    "soc",
+    "llm",
+    "policy",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+dependencies = [
+    "typer>=0.12.5",
+    "rich>=13.7.1",
+    "pydantic>=2.8.0",
+    "pydantic-settings>=2.4.0",
+    "httpx>=0.27.0",
+    "pyyaml>=6.0.1",
+    "platformdirs>=4.2.2",
+    "jinja2>=3.1.4",
+]
+
+[project.optional-dependencies]
+tui = ["textual>=0.79.0"]
+dev = [
+    "pytest>=8.3.2",
+    "pytest-asyncio>=0.23.8",
+    "ruff>=0.6.2",
+]
+
+[project.scripts]
+secpilot = "secpilot.cli.app:main"
+
+[project.urls]
+Homepage = "https://github.com/example/secpilot"
+Documentation = "docs/ARCHITECTURE.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/secpilot"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/policies",
+    "/toolpacks",
+    "/docs",
+    "/tests",
+    "/privileged-helper",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["B008", "E501"]

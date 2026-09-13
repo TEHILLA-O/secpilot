@@ -1,0 +1,38 @@
+# Default SecPilot policy. Loaded for documentation and future hot-reload.
+# Enforcement lives in Python (PolicyEngine) so this file stays reviewable.
+
+version: 1
+never_execute:
+  - exploit
+  - payload
+  - persistence
+  - credential_exfil
+  - data_destruction
+  - lateral_movement
+modes:
+  observe:
+    execute: false
+  audit:
+    execute: true
+    categories:
+      - service_discovery
+      - service_version
+      - dns_lookup
+      - whois_lookup
+      - http_probe
+      - tls_inspection
+      - web_fingerprint
+      - host_audit
+      - service_status
+      - log_review
+      - file_identify
+      - strings_extract
+      - metadata_extract
+  lab:
+    execute: true
+    extra_categories:
+      - packet_capture
+      - yara_scan
+approval:
+  required: true
+  skip_if_auto_approve: true

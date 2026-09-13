@@ -1,0 +1,6 @@
+name: host-audit
+description: Defensive local host auditing
+adapters:
+  - lynis
+  - systemctl
+  - journalctl

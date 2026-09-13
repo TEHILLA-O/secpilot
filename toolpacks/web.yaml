@@ -1,0 +1,6 @@
+name: web
+description: HTTP probing, TLS inspection, and technology identification
+adapters:
+  - curl
+  - openssl
+  - whatweb

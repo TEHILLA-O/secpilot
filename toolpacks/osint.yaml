@@ -1,0 +1,5 @@
+name: osint
+description: Public registration metadata for in-scope names
+adapters:
+  - whois
+  - dig

@@ -1,0 +1,10 @@
+[package]
+name = "secpilot-helper"
+version = "0.1.0"
+edition = "2021"
+description = "Least-privilege helper for SecPilot. Executes only allowlisted argv."
+license = "MIT"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

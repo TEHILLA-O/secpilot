@@ -1,0 +1,5 @@
+name: network-analysis
+description: Limited local packet inspection (lab mode only)
+adapters:
+  - tshark
+  - tcpdump
