@@ -1,64 +1,63 @@
 # Architecture
 
-SecPilot is an LLM-powered security operations terminal. The model proposes work. A local policy engine decides what is executable. Adapters construct argv lists. The model never reaches a shell.
+SecPilot is an LLM-powered security operations terminal for authorized audits on Kali Linux, Parrot OS, Debian, and similar hosts. The model proposes work. A local policy engine decides what is executable. Adapters construct argv lists. The model never reaches a shell.
+
+## Product purpose
+
+Operators describe a defensive goal in natural language (for example: find what is exposed on a lab host and explain anything unusual). SecPilot classifies the request, plans capabilities, checks mode and authorized scope, asks for confirmation, runs allowlisted tools, stores structured evidence, and produces a report.
+
+## Main components
+
+| Component | Role |
+| --- | --- |
+| CLI / TUI | Typer commands and a Rich REPL (`src/secpilot/cli`, `src/secpilot/tui`) |
+| LLM providers | `plan()` and `analyse()` only: Ollama, API, llama.cpp, or deterministic fallback |
+| Policy engine | Mode (`observe` / `audit` / `lab`), authorized scope, permanent deny list |
+| Tool registry | Capability name maps to an adapter that builds a fixed argv vector |
+| Evidence store | JSON plus raw stdout/stderr on disk |
+| Sessions | SQLite index and replay log |
+| Reports | Markdown, HTML, and JSON exporters |
+| Privileged helper | Optional Rust binary (`privileged-helper`) for allowlisted root ops |
+
+## Data and control flow
 
 ```
 You
- │
- ▼
+ |
+ v
 SecPilot CLI / TUI
- │
- ▼
+ |
+ v
 LLM Planner          (Ollama | API | llama.cpp | fallback)
- │
- ▼
+ |
+ v
 Policy Engine        (mode + scope + deny-list)
- │
- ▼
-Human approval
- │
- ▼
-Tool Registry        (capability → adapter → argv)
- │
- ▼
+ |
+ v
+Human approval (y/N)
+ |
+ v
+Tool Registry        (capability -> adapter -> argv)
+ |
+ v
 Structured evidence
- │
- ▼
+ |
+ v
 LLM Analyst
- │
- ▼
+ |
+ v
 Findings + report
 ```
 
-## Layers
+`AuditWorkflow` implements this as an explicit state machine over Pydantic contracts. The planner emits a capability such as `service_discovery`, never a free-form command string. Out-of-scope hosts are refused before any argv is built.
 
-| Layer | Responsibility |
-| --- | --- |
-| CLI / TUI | Typer commands and a Rich REPL |
-| LLM providers | `plan()` and `analyse()` only |
-| Policy | Mode, authorized scope, permanent denials |
-| Adapters | Validate target + build argv + parse stdout |
-| Evidence | JSON + raw output on disk |
-| Sessions | SQLite index and replay log |
-| Privileged helper | Optional Rust binary for allowlisted root ops |
+## Why this is not shelling out LLM text
 
-## Why this is not `os.system(llm_response)`
-
-1. The planner emits a capability (`service_discovery`), never a command string.
+1. The planner emits a capability, never a command string.
 2. `PolicyEngine` rejects out-of-scope targets and exploitation.
 3. The matching adapter builds a fixed argv vector.
-4. `asyncio.create_subprocess_exec(*argv)` is used. `shell=True` is never used.
+4. Execution uses `asyncio.create_subprocess_exec(*argv)`. `shell=True` is never used.
 5. Privileged work, if needed, goes to a small Rust helper with its own allowlist.
-
-## Workflow
-
-```
-USER → Scope Validator → Planner → Policy → Tool Selection
-     → Human Approval → Execute → Parse
-     → more evidence? → Replan : Correlate → Report
-```
-
-`AuditWorkflow` implements this as an explicit state machine. LangGraph is optional later if you want graph persistence; the contracts are already Pydantic models.
 
 ## Package map
 
@@ -75,4 +74,14 @@ src/secpilot/
   sessions/     SQLite + replay
   privileged/   Helper client
   config/       YAML settings
+policies/       Policy definitions
+toolpacks/      network, web, host-audit, forensics, osint, ...
+tests/          pytest suite
 ```
+
+## Related docs
+
+- [Security model](SECURITY-MODEL.md)
+- [Tool sandbox](TOOL-SANDBOX.md)
+- [Authorized scope](AUTHORIZED-SCOPE.md)
+- [Model providers](MODEL-PROVIDERS.md)
